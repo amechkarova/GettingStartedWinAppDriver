@@ -1,12 +1,13 @@
-﻿using Interop.UIAutomationClient;
-using NUnit.Allure.Attributes;
+﻿using NUnit.Allure.Attributes;
 using NUnit.Allure.Core;
-using NUnit.Framework;
 using NUnit.Framework.Legacy;
 using OpenQA.Selenium.Appium;
 using OpenQA.Selenium.Appium.Windows;
-using System.Collections.ObjectModel;
-using System.Linq;
+using OpenQA.Selenium.Appium.Enums;
+using OpenQA.Selenium.Appium.Interfaces;
+using OpenQA.Selenium.Interactions;
+using WinAppDriverTests.CalculatorViews;
+using OpenQA.Selenium;
 
 namespace WinAppDriverTests
 {
@@ -47,19 +48,15 @@ namespace WinAppDriverTests
         [Test]
         [AllureSubSuite("Convertion")]
         [AllureFeature("Temperature")]
-        public void CelciusToFahrenHeit()
+        public void CelsiusToFahrenheit()
         {
-            _driver.FindElementByAccessibilityId("TogglePaneButton").Click();
-            _driver.FindElementByAccessibilityId("Temperature").Click();
-            _driver.FindElementByAccessibilityId("Units1").Click();
-            _driver.FindElementByName("Celsius").Click();
-            _driver.FindElementByAccessibilityId("Units2").Click();
-            _driver.FindElementByName("Fahrenheit").Click();
-            _driver.FindElementByAccessibilityId("num3Button").Click();
-            _driver.FindElementByAccessibilityId("num6Button").Click();
-            _driver.FindElementByAccessibilityId("decimalSeparatorButton").Click();
-            _driver.FindElementByAccessibilityId("num6Button").Click();
-            string fahrenheit = _driver.FindElementByAccessibilityId("Value2").Text;
+            CalculatorBaseView baseView = new CalculatorBaseView(_driver);
+            baseView.SelectCalculatorType("Temperature");
+            TemperatureCalculatorView temperatureCalculatorView = new TemperatureCalculatorView(_driver);
+            temperatureCalculatorView.SelectUnitFrom("Celsius");
+            temperatureCalculatorView.SelectUnitTo("Fahrenheit");
+            temperatureCalculatorView.insertValue("36.6");
+            string fahrenheit = temperatureCalculatorView.getResult();
             ClassicAssert.IsTrue(fahrenheit.Contains("97.88"));
         }
 
@@ -68,34 +65,14 @@ namespace WinAppDriverTests
         [AllureFeature("Area")]
         public void SquareCentimetersToSuqareFeets()
         {
-            _driver.FindElementByAccessibilityId("TogglePaneButton").Click();
-            _driver.FindElementByAccessibilityId("Area").Click();
-            _driver.FindElementByAccessibilityId("Units1").Click();
-            _driver.FindElementByName("Square centimeters").Click();
-            _driver.FindElementByAccessibilityId("Units2").Click();
-            _driver.FindElementByName("Square feet").Click();
-            _driver.FindElementByAccessibilityId("num1Button").Click();
-            _driver.FindElementByAccessibilityId("num0Button").Click();
-            string feet = _driver.FindElementByAccessibilityId("Value2").Text;
+            CalculatorBaseView baseView = new CalculatorBaseView(_driver);
+            baseView.SelectCalculatorType("Area");
+            AreaCalculatorView areaCalculatorView = new AreaCalculatorView(_driver);
+            areaCalculatorView.SelectUnitFrom("Square centimeters");
+            areaCalculatorView.SelectUnitTo("Square feet");
+            areaCalculatorView.insertValue("10");
+            string feet = areaCalculatorView.getResult();
             ClassicAssert.IsTrue(feet.Contains("0.010764"));
-
-            //Trying to verify the value in 'About equal to' section
-            //var elements = _driver.FindElementsByTagName("Text");
-            //bool squareInches = false;
-            //bool squareMillimeters = false;
-            //bool hands = false;
-            //for (int i = 0; i < elements.Count; i++)
-            //{
-            //    if (elements[i].GetAttribute("Name").StartsWith("1.55 Square inches"))
-            //        squareInches = true;
-            //    if(elements[i].GetAttribute("Name").StartsWith("1,000 Square millimeters"))
-            //        squareMillimeters = true;
-            //    if (elements[i].GetAttribute("Name").StartsWith("0.08 hands"))
-            //        hands = true;
-            //}
-            //ClassicAssert.IsTrue(squareInches);
-            //ClassicAssert.IsTrue(squareMillimeters);
-            //ClassicAssert.IsTrue(hands);
         }
 
         [Test]
@@ -104,22 +81,14 @@ namespace WinAppDriverTests
         [TestCase("45", "5", "2", "-5.2051948326348630821610397049348")]
         [TestCase("6", "2", "6", "-8.0802560960265631290285898187409")]
         [TestCase("77", "9.12", "1.6", "-9.5639166212377248900749403868848")]
-        public void CalculateTheFormula(string m, string x, string y, string result)
+        public void CalculateTheFormula(string operand1, string operand2, string operand3, string result)
         {
-            _driver.FindElementByAccessibilityId("TogglePaneButton").Click();
-            _driver.FindElementByAccessibilityId("Scientific").Click();
-            _driver.FindElementByAccessibilityId("piButton").Click();
-            _driver.FindElementByAccessibilityId("plusButton").Click();
-            _driver.FindElementByAccessibilityId("CalculatorResults").SendKeys(m);
-            _driver.FindElementByAccessibilityId("logBase10Button").Click();
-            _driver.FindElementByAccessibilityId("minusButton").Click();
-            _driver.FindElementByAccessibilityId("openParenthesisButton").Click();
-            _driver.FindElementByAccessibilityId("CalculatorResults").SendKeys(x);
-            _driver.FindElementByAccessibilityId("multiplyButton").Click();
-            _driver.FindElementByAccessibilityId("CalculatorResults").SendKeys(y);
-            _driver.FindElementByAccessibilityId("closeParenthesisButton").Click();
-            _driver.FindElementByAccessibilityId("equalButton").Click();
-            ClassicAssert.IsTrue(_driver.FindElementByAccessibilityId("CalculatorResults").Text.Contains(result));
+            CalculatorBaseView baseView = new CalculatorBaseView(_driver);
+            baseView.SelectCalculatorType("Scientific");
+            ScientificCalculatorView scientificCalculatorView = new ScientificCalculatorView(_driver);
+            string calculatedValue = scientificCalculatorView.CalculateFormula(operand1, operand2, operand3);
+            
+            ClassicAssert.IsTrue(calculatedValue.Contains(result));
         }
 
         [Test]
@@ -130,21 +99,14 @@ namespace WinAppDriverTests
         [TestCase("-9.5639166212377248900749403868848", "-0.16614775924946538440226613696557", "0.98610086811460707171368806397877")]
         public void CalculateSinAndCos(string input, string sinValue, string cosValue)
         {
-            _driver.FindElementByAccessibilityId("TogglePaneButton").Click();
-            _driver.FindElementByAccessibilityId("Scientific").Click();
-            _driver.FindElementByAccessibilityId("CalculatorResults").SendKeys(input);
-            _driver.FindElementByAccessibilityId("trigButton").Click();
-            _driver.FindElementByAccessibilityId("sinButton").Click();
-            _driver.FindElementByAccessibilityId("equalButton").Click();
-            string sinValueActual = _driver.FindElementByAccessibilityId("CalculatorResults").Text;   
-            _driver.FindElementByAccessibilityId("clearEntryButton").Click();
-            _driver.FindElementByAccessibilityId("CalculatorResults").SendKeys(input);
-            _driver.FindElementByAccessibilityId("trigButton").Click();
-            _driver.FindElementByAccessibilityId("cosButton").Click();
-            _driver.FindElementByAccessibilityId("equalButton").Click();
-            string cosValueActual = _driver.FindElementByAccessibilityId("CalculatorResults").Text;
-            ClassicAssert.IsTrue(sinValueActual.Contains(sinValue));
-            ClassicAssert.IsTrue(cosValueActual.Contains(cosValue));
+            CalculatorBaseView baseView = new CalculatorBaseView(_driver);
+            baseView.SelectCalculatorType("Scientific");
+            ScientificCalculatorView scientificCalculatorView = new ScientificCalculatorView(_driver);
+            string sinResult =  scientificCalculatorView.CalculateSin(input);
+            string cosResult = scientificCalculatorView.CalculateCos(input);
+            
+            ClassicAssert.IsTrue(sinResult.Contains(sinValue));
+            ClassicAssert.IsTrue(cosResult.Contains(cosValue));
         }
     }
 }
