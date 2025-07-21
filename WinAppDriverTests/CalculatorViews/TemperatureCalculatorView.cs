@@ -1,30 +1,28 @@
 ﻿using OpenQA.Selenium.Appium.Windows;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using WinAppDriverTests.CalculatorViews.Enums;
 
-namespace WinAppDriverTests.CalculatorViews
+namespace WinAppDriverTests.CalculatorViews;
+
+public class TemperatureCalculatorView : ConvertionBaseView
 {
-    public class TemperatureCalculatorView : ConvertionBaseView
+    public TemperatureCalculatorView(WindowsDriver<WindowsElement> driver) : base(driver) 
+    { 
+    }
+
+    public void SelectUnitFrom(TemperatureUnits unit)
     {
-        protected WindowsElement Celsius => _driver.FindElementByName("Celsius");
-        protected WindowsElement Fahrenheit => _driver.FindElementByName("Fahrenheit");
-        protected WindowsElement Kelvin => _driver.FindElementByName("Kelvin");
+        UnitFrom.Click();
+        SelectUnit(unit);
+    }
 
-        public TemperatureCalculatorView(WindowsDriver<WindowsElement> driver) : base(driver) 
-        { 
-        }
+    public void SelectUnitTo(TemperatureUnits unit)
+    {
+        UnitTo.Click();
+        SelectUnit(unit);
+    }
 
-        public override void SelectUnit(string unit)
-        {
-            switch(unit)
-            {
-                case "Celsius": Celsius.Click(); break;
-                case "Fahrenheit": Fahrenheit.Click(); break;
-                case "Kelvin": Kelvin.Click(); break;   
-            }
-        }
+    public void SelectUnit(TemperatureUnits unit)
+    {
+        _driver.FindElementByName(unit.ToString()).Click();
     }
 }
